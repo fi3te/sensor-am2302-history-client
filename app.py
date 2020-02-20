@@ -1,9 +1,9 @@
 import backup_service
-import printer
+import print_service
 
-printer.print_heading('sensor-am2302-history-client')
+print_service.print_heading('sensor-am2302-history-client')
 
-printer.print_subheading('Please choose an option...')
+print_service.print_subheading('Please choose an option...')
 
 print('1) Backup files')
 print()
