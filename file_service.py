@@ -1,8 +1,20 @@
 from typing import List
+from model import Measurement
 import os
 
 BACKUP_FOLDER_NAME = 'backup'
 BACKUP_FOLDER_PATH = './' + BACKUP_FOLDER_NAME
+
+
+def _file(file_name: str, mode: str): return open(BACKUP_FOLDER_PATH + '/' + file_name + '.txt', mode, encoding='utf-8')
+
+
+def _parse_measurement(measurement: str) -> Measurement:
+    split_record = measurement.split(' ')
+    time = split_record[0]
+    temperature = float(split_record[2][:-3])
+    humidity = float(split_record[4][:-1])
+    return Measurement(time, temperature, humidity)
 
 
 def create_directory_for_backup_files() -> str:
@@ -14,8 +26,23 @@ def create_directory_for_backup_files() -> str:
 
 
 def write_content_to_backup_file(file_name: str, file_content: str) -> None:
-    file = open(BACKUP_FOLDER_PATH + '/' + file_name + '.txt', 'w', encoding='utf-8')
+    file = _file(file_name, 'w')
     file.write(file_content)
+    file.close()
+
+
+def read_measurements_of_backup_file(file_name: str) -> List[Measurement]:
+    file = _file(file_name, 'r')
+    measurements = [_parse_measurement(line[:-1]) for line in file]
+    file.close()
+    return measurements
+
+
+def read_all_measurements() -> List[Measurement]:
+    all_measurements = []
+    for file_name in get_backup_file_names():
+        all_measurements += read_measurements_of_backup_file(file_name)
+    return all_measurements
 
 
 def get_backup_file_names() -> List[str]:
@@ -26,3 +53,12 @@ def get_backup_file_names() -> List[str]:
                 backup_file_names.append(file[:-4])
     backup_file_names.sort()
     return backup_file_names
+
+
+def count_backup_files() -> int:
+    count = 0
+    for subdir, dirs, files in os.walk(BACKUP_FOLDER_PATH):
+        for _ in files:
+            if subdir == BACKUP_FOLDER_PATH:
+                count += 1
+    return count
