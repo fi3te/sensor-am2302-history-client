@@ -1,5 +1,5 @@
 from typing import List
-from model import Measurement
+from model import Measurement, MeasurementCollection
 import os
 
 BACKUP_FOLDER_NAME = 'backup'
@@ -43,6 +43,13 @@ def read_all_measurements() -> List[Measurement]:
     for file_name in get_backup_file_names():
         all_measurements += read_measurements_of_backup_file(file_name)
     return all_measurements
+
+
+def read_measurements_grouped_by_day() -> List[MeasurementCollection]:
+    collections = []
+    for file_name in get_backup_file_names():
+        collections.append(MeasurementCollection(file_name, read_measurements_of_backup_file(file_name)))
+    return collections
 
 
 def get_backup_file_names() -> List[str]:
