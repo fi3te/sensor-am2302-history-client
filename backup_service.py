@@ -11,7 +11,7 @@ def start_backup() -> None:
     print(msg)
 
     print_service.print_subheading('Determining already downloaded files...')
-    downloaded_elements = file_service.get_backup_file_names()
+    downloaded_elements = file_service.get_backup_file_names_without_file_extension()
     print('Count: ' + str(len(downloaded_elements)))
     last_downloaded_element = downloaded_elements[-1]
     print('Last downloaded: ' + last_downloaded_element)

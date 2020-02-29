@@ -2,9 +2,8 @@ import statistics
 from typing import List
 
 import file_service
+import filter_service
 import print_service
-
-MIN_REALISTIC_TEMPERATURE_VALUE = 10.0
 
 
 def _print_statistics_for_list(values: List[float]) -> None:
@@ -22,7 +21,7 @@ def show_statistics() -> None:
     number_of_measurements = len(all_measurements)
     number_of_backup_files = file_service.count_backup_files()
     temperature_values = [measurement.temperature for measurement in all_measurements if
-                          measurement.temperature >= MIN_REALISTIC_TEMPERATURE_VALUE]
+                          filter_service.is_realistic_temperature_value(measurement.temperature)]
     humidity_values = [measurement.humidity for measurement in all_measurements]
 
     print_service.print_subheading('Number of backup files: ' + str(number_of_backup_files))
