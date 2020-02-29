@@ -38,7 +38,7 @@ def _min(measurement_collection: MeasurementCollection) -> MeasurementAggregatio
                                   min(_humidity_list(measurement_collection)))
 
 
-def create_plot() -> None:
+def create_daily_mean_plot() -> None:
     measurement_collections = file_service.read_measurements_grouped_by_day()
 
     fig, axs = plt.subplots(2, sharex=True)
