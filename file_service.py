@@ -40,19 +40,31 @@ def read_measurements_of_backup_file(file_name: str) -> List[Measurement]:
 
 def read_all_measurements() -> List[Measurement]:
     all_measurements = []
-    for file_name in get_backup_file_names():
+    for file_name in get_backup_file_names_without_file_extension():
         all_measurements += read_measurements_of_backup_file(file_name)
     return all_measurements
 
 
 def read_measurements_grouped_by_day() -> List[MeasurementCollection]:
     collections = []
-    for file_name in get_backup_file_names():
+    for file_name in get_backup_file_names_without_file_extension():
         collections.append(MeasurementCollection(file_name, read_measurements_of_backup_file(file_name)))
     return collections
 
 
-def get_backup_file_names() -> List[str]:
+def read_measurements_grouped_by_month() -> List[MeasurementCollection]:
+    measurements_of_month_dictionary = {}
+    for file_name in get_backup_file_names_without_file_extension():
+        month_key = file_name[:-3]
+        month_collection = measurements_of_month_dictionary.get(month_key, None)
+        if month_collection is None:
+            month_collection = MeasurementCollection(month_key, [])
+            measurements_of_month_dictionary[month_key] = month_collection
+        month_collection.measurements.extend(read_measurements_of_backup_file(file_name))
+    return [value for key, value in measurements_of_month_dictionary.items()]
+
+
+def get_backup_file_names_without_file_extension() -> List[str]:
     backup_file_names = []
     for subdir, dirs, files in os.walk(BACKUP_FOLDER_PATH):
         for file in files:

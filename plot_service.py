@@ -1,11 +1,13 @@
 import statistics
-from typing import List
+from typing import List, Callable
 
 import matplotlib.pyplot as plt
 
 import file_service
+import filter_service
 from model import MeasurementCollection, MeasurementAggregation, AggregationType
 
+TWENTY_DEGREES_CENTIGRADE_COLOR = 'lightgrey'
 TEMPERATURE_COLOR = 'tab:red'
 LIGHT_TEMPERATURE_COLOR = 'mistyrose'
 HUMIDITY_COLOR = 'tab:blue'
@@ -13,7 +15,8 @@ LIGHT_HUMIDITY_COLOR = 'lavender'
 
 
 def _temperature_list(measurement_collection: MeasurementCollection) -> List[float]:
-    return [measurement.temperature for measurement in measurement_collection.measurements]
+    return filter_service.impute_temperature_values_with_mean_of_surroundings(
+        [measurement.temperature for measurement in measurement_collection.measurements])
 
 
 def _humidity_list(measurement_collection: MeasurementCollection) -> List[float]:
@@ -38,38 +41,48 @@ def _min(measurement_collection: MeasurementCollection) -> MeasurementAggregatio
                                   min(_humidity_list(measurement_collection)))
 
 
-def create_daily_mean_plot() -> None:
-    measurement_collections = file_service.read_measurements_grouped_by_day()
-
+def _show_min_max_mean_plot(measurement_collections: List[MeasurementCollection], filter_tags_for_xticks: Callable[[List[str]], List[str]]) -> None:
     fig, axs = plt.subplots(2, sharex=True)
     fig.suptitle('Temperature and humidity values')
     axs[0].set_title('Temperature (°C)')
     axs[1].set_title('Humidity (%)')
 
-    daily_mean_list = [_mean(measurement_collection) for measurement_collection in measurement_collections]
-    daily_min_list = [_min(measurement_collection) for measurement_collection in measurement_collections]
-    daily_max_list = [_max(measurement_collection) for measurement_collection in measurement_collections]
+    mean_list = [_mean(measurement_collection) for measurement_collection in measurement_collections]
+    min_list = [_min(measurement_collection) for measurement_collection in measurement_collections]
+    max_list = [_max(measurement_collection) for measurement_collection in measurement_collections]
 
-    x_list = [daily_mean.tag for daily_mean in daily_mean_list]
+    x_list = [mean.tag for mean in mean_list]
 
-    daily_mean_temperature_list = [daily_mean.temperature for daily_mean in daily_mean_list]
-    daily_mean_humidity_list = [daily_mean.humidity for daily_mean in daily_mean_list]
-    axs[0].plot(x_list, daily_mean_temperature_list, TEMPERATURE_COLOR)
-    axs[1].plot(x_list, daily_mean_humidity_list, HUMIDITY_COLOR)
+    axs[0].plot(x_list, [20] * len(x_list), TWENTY_DEGREES_CENTIGRADE_COLOR)
 
-    daily_min_temperature_list = [daily_min.temperature for daily_min in daily_min_list]
-    daily_min_humidity_list = [daily_min.humidity for daily_min in daily_min_list]
-    axs[0].plot(x_list, daily_min_temperature_list, LIGHT_TEMPERATURE_COLOR)
-    axs[1].plot(x_list, daily_min_humidity_list, LIGHT_HUMIDITY_COLOR)
+    mean_temperature_list = [mean.temperature for mean in mean_list]
+    mean_humidity_list = [mean.humidity for mean in mean_list]
+    axs[0].plot(x_list, mean_temperature_list, TEMPERATURE_COLOR)
+    axs[1].plot(x_list, mean_humidity_list, HUMIDITY_COLOR)
 
-    daily_max_temperature_list = [daily_max.temperature for daily_max in daily_max_list]
-    daily_max_humidity_list = [daily_max.humidity for daily_max in daily_max_list]
-    axs[0].plot(x_list, daily_max_temperature_list, LIGHT_TEMPERATURE_COLOR)
-    axs[1].plot(x_list, daily_max_humidity_list, LIGHT_HUMIDITY_COLOR)
+    min_temperature_list = [min_item.temperature for min_item in min_list]
+    min_humidity_list = [min_item.humidity for min_item in min_list]
+    axs[0].plot(x_list, min_temperature_list, LIGHT_TEMPERATURE_COLOR)
+    axs[1].plot(x_list, min_humidity_list, LIGHT_HUMIDITY_COLOR)
 
-    first_days_of_month = [tag for tag in x_list if tag.endswith('-01')]
-    indices = [x_list.index(tag) for tag in first_days_of_month]
+    max_temperature_list = [max_item.temperature for max_item in max_list]
+    max_humidity_list = [max_item.humidity for max_item in max_list]
+    axs[0].plot(x_list, max_temperature_list, LIGHT_TEMPERATURE_COLOR)
+    axs[1].plot(x_list, max_humidity_list, LIGHT_HUMIDITY_COLOR)
 
-    plt.xticks(indices, first_days_of_month)
+    tags = filter_tags_for_xticks(x_list)
+    indices = [x_list.index(tag) for tag in tags]
+
+    plt.xticks(indices, tags)
 
     plt.show()
+
+
+def show_daily_mean_plot() -> None:
+    measurement_collections = file_service.read_measurements_grouped_by_day()
+    _show_min_max_mean_plot(measurement_collections, lambda tags: [tag for tag in tags if tag.endswith('-01')])
+
+
+def show_monthly_mean_plot() -> None:
+    measurement_collections = file_service.read_measurements_grouped_by_month()
+    _show_min_max_mean_plot(measurement_collections, lambda tags: tags)
