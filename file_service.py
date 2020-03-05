@@ -1,6 +1,8 @@
-from typing import List
-from model import Measurement, MeasurementCollection
 import os
+from datetime import datetime
+from typing import List
+
+from model import Measurement, MeasurementCollection
 
 BACKUP_FOLDER_NAME = 'backup'
 BACKUP_FOLDER_PATH = './' + BACKUP_FOLDER_NAME
@@ -62,6 +64,20 @@ def read_measurements_grouped_by_month() -> List[MeasurementCollection]:
             measurements_of_month_dictionary[month_key] = month_collection
         month_collection.measurements.extend(read_measurements_of_backup_file(file_name))
     return [value for key, value in measurements_of_month_dictionary.items()]
+
+
+def read_measurements_grouped_by_week() -> List[MeasurementCollection]:
+    measurement_of_week_dictionary = {}
+    for file_name in get_backup_file_names_without_file_extension():
+        file_date = datetime.strptime(file_name, '%Y-%m-%d').date()
+        year, week_number, _ = file_date.isocalendar()
+        week_key = '%s.%s' % (year, week_number)
+        week_collection = measurement_of_week_dictionary.get(week_key, None)
+        if week_collection is None:
+            week_collection = MeasurementCollection(week_key, [])
+            measurement_of_week_dictionary[week_key] = week_collection
+        week_collection.measurements.extend(read_measurements_of_backup_file(file_name))
+    return [value for key, value in measurement_of_week_dictionary.items()]
 
 
 def get_backup_file_names_without_file_extension() -> List[str]:

@@ -12,6 +12,7 @@ TEMPERATURE_COLOR = 'tab:red'
 LIGHT_TEMPERATURE_COLOR = 'mistyrose'
 HUMIDITY_COLOR = 'tab:blue'
 LIGHT_HUMIDITY_COLOR = 'lavender'
+MAX_NUMBER_OF_XTICKS = 5
 
 
 def _temperature_list(measurement_collection: MeasurementCollection) -> List[float]:
@@ -41,7 +42,9 @@ def _min(measurement_collection: MeasurementCollection) -> MeasurementAggregatio
                                   min(_humidity_list(measurement_collection)))
 
 
-def _show_min_max_mean_plot(measurement_collections: List[MeasurementCollection], filter_tags_for_xticks: Callable[[List[str]], List[str]]) -> None:
+def _show_min_max_mean_plot(measurement_collections: List[MeasurementCollection],
+                            filter_tags_for_xticks: Callable[[List[str]], List[str]] = lambda tags: _spaced_tags(tags,
+                                                                                                                 MAX_NUMBER_OF_XTICKS)) -> None:
     fig, axs = plt.subplots(2, sharex=True)
     fig.suptitle('Temperature and humidity values')
     axs[0].set_title('Temperature (°C)')
@@ -78,11 +81,33 @@ def _show_min_max_mean_plot(measurement_collections: List[MeasurementCollection]
     plt.show()
 
 
+def _spaced_tags(tags: List[str], number_of_elements: int) -> List[str]:
+    if len(tags) <= number_of_elements:
+        return tags
+    else:
+        number_of_tags = len(tags)
+        return [tags[int(x * (number_of_tags - 1) / (number_of_elements - 1))] for x in range(number_of_elements)]
+
+
+def _evenly_spaced(tags: List[str], max_number_of_elements: int) -> List[str]:
+    if len(tags) <= max_number_of_elements:
+        return tags
+    else:
+        number_of_tags = len(tags)
+        every_nth = round(number_of_tags / max_number_of_elements)
+        return [tag for num, tag in enumerate(tags) if num % every_nth == 0]
+
+
 def show_daily_mean_plot() -> None:
     measurement_collections = file_service.read_measurements_grouped_by_day()
-    _show_min_max_mean_plot(measurement_collections, lambda tags: [tag for tag in tags if tag.endswith('-01')])
+    _show_min_max_mean_plot(measurement_collections)
+
+
+def show_weekly_mean_plot() -> None:
+    measurement_collection = file_service.read_measurements_grouped_by_week()
+    _show_min_max_mean_plot(measurement_collection)
 
 
 def show_monthly_mean_plot() -> None:
     measurement_collections = file_service.read_measurements_grouped_by_month()
-    _show_min_max_mean_plot(measurement_collections, lambda tags: tags)
+    _show_min_max_mean_plot(measurement_collections, lambda tags: _evenly_spaced(tags, MAX_NUMBER_OF_XTICKS))
