@@ -1,3 +1,4 @@
+import datetime
 import os
 from typing import List
 
@@ -11,12 +12,12 @@ BACKUP_FOLDER_PATH = './' + BACKUP_FOLDER_NAME
 def _file(file_name: str, mode: str): return open(BACKUP_FOLDER_PATH + '/' + file_name + '.txt', mode, encoding='utf-8')
 
 
-def _parse_measurement(measurement: str) -> Measurement:
+def _parse_measurement(measurement: str, date: datetime.date) -> Measurement:
     split_record = measurement.split(' ')
-    time = split_record[0]
+    time = date_service.parse_time(split_record[0])
     temperature = float(split_record[2][:-3])
     humidity = float(split_record[4][:-1])
-    return Measurement(time, temperature, humidity)
+    return Measurement(date, time, temperature, humidity)
 
 
 def create_directory_for_backup_files() -> str:
@@ -35,7 +36,8 @@ def write_content_to_backup_file(file_name: str, file_content: str) -> None:
 
 def read_measurements_of_backup_file(file_name: str) -> List[Measurement]:
     file = _file(file_name, 'r')
-    measurements = [_parse_measurement(line[:-1]) for line in file]
+    date = date_service.file_name_to_date(file_name)
+    measurements = [_parse_measurement(line[:-1], date) for line in file]
     file.close()
     return measurements
 
