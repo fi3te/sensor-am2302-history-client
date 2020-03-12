@@ -43,6 +43,11 @@ def process_options(options: List[Option], show_options: bool) -> None:
         process_options(options, False)
 
 
-print_service.print_heading('sensor-am2302-history-client')
-print_service.print_subheading('Please choose an option...')
-process_options(all_options, True)
+def main() -> None:
+    print_service.print_heading('sensor-am2302-history-client')
+    print_service.print_subheading('Please choose an option...')
+    process_options(all_options, True)
+
+
+if __name__ == '__main__':
+    main()
