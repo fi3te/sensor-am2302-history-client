@@ -12,16 +12,16 @@ class Option(NamedTuple):
     description: str
     executable: bool
     action: Optional[types.FunctionType]
-    suboptions: Optional[List['Option']]
+    suboptions: Optional[List['Option']] = None
 
 
 all_options = [
-    Option('1', 'Backup files', True, backup_service.start_backup, None),
-    Option('2', 'Show backup statistics', True, statistics_service.show_statistics, None),
+    Option('1', 'Backup files', True, backup_service.start_backup),
+    Option('2', 'Show backup statistics', True, statistics_service.show_statistics),
     Option('3', 'Create plot', False, None, [
-        Option('1', 'Daily mean plot', True, plot_service.show_daily_mean_plot, None),
-        Option('2', 'Weekly mean plot', True, plot_service.show_weekly_mean_plot, None),
-        Option('3', 'Monthly mean plot', True, plot_service.show_monthly_mean_plot, None)
+        Option('1', 'Daily mean plot', True, plot_service.show_daily_mean_plot),
+        Option('2', 'Weekly mean plot', True, plot_service.show_weekly_mean_plot),
+        Option('3', 'Monthly mean plot', True, plot_service.show_monthly_mean_plot)
     ])
 ]
 

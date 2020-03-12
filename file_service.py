@@ -1,7 +1,7 @@
 import os
-from datetime import datetime
 from typing import List
 
+import date_service
 from model import Measurement, MeasurementCollection
 
 BACKUP_FOLDER_NAME = 'backup'
@@ -69,9 +69,8 @@ def read_measurements_grouped_by_month() -> List[MeasurementCollection]:
 def read_measurements_grouped_by_week() -> List[MeasurementCollection]:
     measurement_of_week_dictionary = {}
     for file_name in get_backup_file_names_without_file_extension():
-        file_date = datetime.strptime(file_name, '%Y-%m-%d').date()
-        year, week_number, _ = file_date.isocalendar()
-        week_key = '%s.%s' % (year, week_number)
+        iso_calendar = date_service.file_name_to_iso_calendar(file_name)
+        week_key = '%s.%s' % (iso_calendar.year, iso_calendar.week_number)
         week_collection = measurement_of_week_dictionary.get(week_key, None)
         if week_collection is None:
             week_collection = MeasurementCollection(week_key, [])
