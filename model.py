@@ -1,9 +1,11 @@
+import datetime
 from enum import Enum
 from typing import NamedTuple, List
 
 
 class Measurement(NamedTuple):
-    time: str
+    date: datetime.date
+    time: datetime.time
     temperature: float
     humidity: float
 
