@@ -72,16 +72,18 @@ def read_measurements_grouped_by_month() -> List[MeasurementCollection]:
     return [value for key, value in measurements_of_month_dictionary.items()]
 
 
-def read_measurements_grouped_by_week() -> List[MeasurementCollection]:
+def read_measurements_grouped_by_week(from_date: Optional[datetime.date] = None,
+                                      to_date: Optional[datetime.date] = None) -> List[MeasurementCollection]:
     measurement_of_week_dictionary = {}
     for file_name in get_backup_file_names_without_file_extension():
-        iso_calendar = date_service.file_name_to_iso_calendar(file_name)
-        week_key = '%s.%s' % (iso_calendar.year, iso_calendar.week_number)
-        week_collection = measurement_of_week_dictionary.get(week_key, None)
-        if week_collection is None:
-            week_collection = MeasurementCollection(week_key, [])
-            measurement_of_week_dictionary[week_key] = week_collection
-        week_collection.measurements.extend(read_measurements_of_backup_file(file_name))
+        if date_service.file_name_in_interval(file_name, from_date, to_date):
+            iso_calendar = date_service.file_name_to_iso_calendar(file_name)
+            week_key = '%s.%s' % (iso_calendar.year, iso_calendar.week_number)
+            week_collection = measurement_of_week_dictionary.get(week_key, None)
+            if week_collection is None:
+                week_collection = MeasurementCollection(week_key, [])
+                measurement_of_week_dictionary[week_key] = week_collection
+            week_collection.measurements.extend(read_measurements_of_backup_file(file_name))
     return [value for key, value in measurement_of_week_dictionary.items()]
 
 

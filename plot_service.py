@@ -104,8 +104,8 @@ def show_daily_mean_plot(from_date: Optional[date] = None, to_date: Optional[dat
     _show_min_max_mean_plot(measurement_collections)
 
 
-def show_weekly_mean_plot() -> None:
-    measurement_collection = file_service.read_measurements_grouped_by_week()
+def show_weekly_mean_plot(from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
+    measurement_collection = file_service.read_measurements_grouped_by_week(from_date, to_date)
     _show_min_max_mean_plot(measurement_collection)
 
 
