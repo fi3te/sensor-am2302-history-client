@@ -1,6 +1,6 @@
 import datetime
 import os
-from typing import List
+from typing import List, Optional
 
 import date_service
 from model import Measurement, MeasurementCollection
@@ -42,10 +42,12 @@ def read_measurements_of_backup_file(file_name: str) -> List[Measurement]:
     return measurements
 
 
-def read_all_measurements() -> List[Measurement]:
+def read_measurements(from_date: Optional[datetime.date] = None,
+                      to_date: Optional[datetime.date] = None) -> List[Measurement]:
     all_measurements = []
     for file_name in get_backup_file_names_without_file_extension():
-        all_measurements += read_measurements_of_backup_file(file_name)
+        if date_service.file_name_in_interval(file_name, from_date, to_date):
+            all_measurements += read_measurements_of_backup_file(file_name)
     return all_measurements
 
 
@@ -91,10 +93,13 @@ def get_backup_file_names_without_file_extension() -> List[str]:
     return backup_file_names
 
 
-def count_backup_files() -> int:
+def count_backup_files(from_date: Optional[datetime.date] = None, to_date: Optional[datetime.date] = None) -> int:
     count = 0
     for subdir, dirs, files in os.walk(BACKUP_FOLDER_PATH):
-        for _ in files:
+        for file in files:
             if subdir == BACKUP_FOLDER_PATH:
-                count += 1
+                file_name = file[:-4]
+                if date_service.file_name_in_interval(file_name, from_date, to_date):
+                    count += 1
+
     return count
