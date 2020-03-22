@@ -30,8 +30,9 @@ def show_statistics(from_date: Optional[date] = None, to_date: Optional[date] = 
     number_of_measurements_in_interval = len(measurements_in_interval)
     print('Number of measurements in interval: ' + str(number_of_measurements_in_interval))
 
-    print_service.print_subheading('Temperature (°C)')
-    _print_statistics_for_list(temperature_values_in_interval)
+    if number_of_measurements_in_interval:
+        print_service.print_subheading('Temperature (°C)')
+        _print_statistics_for_list(temperature_values_in_interval)
 
-    print_service.print_subheading('Humidity (%)')
-    _print_statistics_for_list(humidity_values_in_interval)
+        print_service.print_subheading('Humidity (%)')
+        _print_statistics_for_list(humidity_values_in_interval)
