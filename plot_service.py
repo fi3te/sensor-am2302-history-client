@@ -109,6 +109,6 @@ def show_weekly_mean_plot(from_date: Optional[date] = None, to_date: Optional[da
     _show_min_max_mean_plot(measurement_collection)
 
 
-def show_monthly_mean_plot() -> None:
-    measurement_collections = file_service.read_measurements_grouped_by_month()
+def show_monthly_mean_plot(from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
+    measurement_collections = file_service.read_measurements_grouped_by_month(from_date, to_date)
     _show_min_max_mean_plot(measurement_collections, lambda tags: _evenly_spaced(tags, MAX_NUMBER_OF_XTICKS))
