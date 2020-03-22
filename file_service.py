@@ -60,15 +60,17 @@ def read_measurements_grouped_by_day(from_date: Optional[datetime.date] = None,
     return collections
 
 
-def read_measurements_grouped_by_month() -> List[MeasurementCollection]:
+def read_measurements_grouped_by_month(from_date: Optional[datetime.date] = None,
+                                       to_date: Optional[datetime.date] = None) -> List[MeasurementCollection]:
     measurements_of_month_dictionary = {}
     for file_name in get_backup_file_names_without_file_extension():
-        month_key = file_name[:-3]
-        month_collection = measurements_of_month_dictionary.get(month_key, None)
-        if month_collection is None:
-            month_collection = MeasurementCollection(month_key, [])
-            measurements_of_month_dictionary[month_key] = month_collection
-        month_collection.measurements.extend(read_measurements_of_backup_file(file_name))
+        if date_service.file_name_in_interval(file_name, from_date, to_date):
+            month_key = file_name[:-3]
+            month_collection = measurements_of_month_dictionary.get(month_key, None)
+            if month_collection is None:
+                month_collection = MeasurementCollection(month_key, [])
+                measurements_of_month_dictionary[month_key] = month_collection
+            month_collection.measurements.extend(read_measurements_of_backup_file(file_name))
     return [value for key, value in measurements_of_month_dictionary.items()]
 
 
