@@ -55,7 +55,7 @@ all_options = [
     ActionOption('1', 'Backup files', backup_service.start_backup),
     ActionOption('2', 'Show backup statistics', statistics_service.show_statistics, INTERVAL_ARGUMENT_DEFINITION),
     ChoiceOption('3', 'Create plot', [
-        ActionOption('1', 'Daily mean plot', plot_service.show_daily_mean_plot),
+        ActionOption('1', 'Daily mean plot', plot_service.show_daily_mean_plot, INTERVAL_ARGUMENT_DEFINITION),
         ActionOption('2', 'Weekly mean plot', plot_service.show_weekly_mean_plot),
         ActionOption('3', 'Monthly mean plot', plot_service.show_monthly_mean_plot)
     ])

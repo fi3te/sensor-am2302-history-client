@@ -1,5 +1,6 @@
 import statistics
-from typing import List, Callable
+from datetime import date
+from typing import List, Callable, Optional
 
 import matplotlib.pyplot as plt
 
@@ -43,9 +44,9 @@ def _min(measurement_collection: MeasurementCollection) -> MeasurementAggregatio
 
 
 def _show_min_max_mean_plot(measurement_collections: List[MeasurementCollection],
-                            filter_tags_for_xticks: Callable[[List[str]], List[str]] = lambda tags: _spaced_tags(tags,
-                                                                                                                 MAX_NUMBER_OF_XTICKS)) -> None:
-    fig, axs = plt.subplots(2, sharex=True)
+                            filter_tags_for_xticks: Callable[[List[str]], List[str]]
+                            = lambda tags: _spaced_tags(tags, MAX_NUMBER_OF_XTICKS)) -> None:
+    fig, axs = plt.subplots(2, sharex='all')
     fig.suptitle('Temperature and humidity values')
     axs[0].set_title('Temperature (°C)')
     axs[1].set_title('Humidity (%)')
@@ -98,8 +99,8 @@ def _evenly_spaced(tags: List[str], max_number_of_elements: int) -> List[str]:
         return [tag for num, tag in enumerate(tags) if num % every_nth == 0]
 
 
-def show_daily_mean_plot() -> None:
-    measurement_collections = file_service.read_measurements_grouped_by_day()
+def show_daily_mean_plot(from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
+    measurement_collections = file_service.read_measurements_grouped_by_day(from_date, to_date)
     _show_min_max_mean_plot(measurement_collections)
 
 

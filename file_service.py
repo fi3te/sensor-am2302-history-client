@@ -51,10 +51,12 @@ def read_measurements(from_date: Optional[datetime.date] = None,
     return all_measurements
 
 
-def read_measurements_grouped_by_day() -> List[MeasurementCollection]:
+def read_measurements_grouped_by_day(from_date: Optional[datetime.date] = None,
+                                     to_date: Optional[datetime.date] = None) -> List[MeasurementCollection]:
     collections = []
     for file_name in get_backup_file_names_without_file_extension():
-        collections.append(MeasurementCollection(file_name, read_measurements_of_backup_file(file_name)))
+        if date_service.file_name_in_interval(file_name, from_date, to_date):
+            collections.append(MeasurementCollection(file_name, read_measurements_of_backup_file(file_name)))
     return collections
 
 
