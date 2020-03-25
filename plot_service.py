@@ -3,10 +3,11 @@ from datetime import date
 from typing import List, Callable, Optional
 
 import matplotlib.pyplot as plt
+from matplotlib import figure, axes
 
 import file_service
 import filter_service
-from model import MeasurementCollection, MeasurementAggregation, AggregationType
+from model import MeasurementCollection, MeasurementAggregation, AggregationType, MeasurementValue
 
 TWENTY_DEGREES_CENTIGRADE_COLOR = 'lightgrey'
 TEMPERATURE_COLOR = 'tab:red'
@@ -14,6 +15,10 @@ LIGHT_TEMPERATURE_COLOR = 'mistyrose'
 HUMIDITY_COLOR = 'tab:blue'
 LIGHT_HUMIDITY_COLOR = 'lavender'
 MAX_NUMBER_OF_XTICKS = 5
+
+
+def _default_filter_tags_for_xticks(tags: List[str]) -> List[str]:
+    return _spaced_tags(tags, MAX_NUMBER_OF_XTICKS)
 
 
 def _temperature_list(measurement_collection: MeasurementCollection) -> List[float]:
@@ -43,41 +48,46 @@ def _min(measurement_collection: MeasurementCollection) -> MeasurementAggregatio
                                   min(_humidity_list(measurement_collection)))
 
 
-def _show_min_max_mean_plot(measurement_collections: List[MeasurementCollection],
-                            filter_tags_for_xticks: Callable[[List[str]], List[str]]
-                            = lambda tags: _spaced_tags(tags, MAX_NUMBER_OF_XTICKS)) -> None:
+def _init_plot(x_list: List[str]) -> (figure.Figure, List[axes.Axes]):
     fig, axs = plt.subplots(2, sharex='all')
     fig.suptitle('Temperature and humidity values')
     axs[0].set_title('Temperature (°C)')
     axs[1].set_title('Humidity (%)')
+    axs[0].plot(x_list, [20] * len(x_list), TWENTY_DEGREES_CENTIGRADE_COLOR)
+    return fig, axs
 
+
+def _plot_values(axs: List[axes.Axes], x_list: List[str], y_list: List[MeasurementValue], temperature_color: str,
+                 humidity_color: str) -> None:
+    temperature_list = [value.temperature for value in y_list]
+    humidity_list = [value.humidity for value in y_list]
+    axs[0].plot(x_list, temperature_list, temperature_color)
+    axs[1].plot(x_list, humidity_list, humidity_color)
+
+
+def set_xticks(x_list: List[str],
+               filter_tags_for_xticks: Callable[[List[str]], List[str]] = _default_filter_tags_for_xticks) -> None:
+    tags = filter_tags_for_xticks(x_list)
+    indices = [x_list.index(tag) for tag in tags]
+    plt.xticks(indices, tags)
+
+
+def _show_min_max_mean_plot(measurement_collections: List[MeasurementCollection],
+                            filter_tags_for_xticks: Callable[
+                                [List[str]], List[str]] = _default_filter_tags_for_xticks) -> None:
     mean_list = [_mean(measurement_collection) for measurement_collection in measurement_collections]
     min_list = [_min(measurement_collection) for measurement_collection in measurement_collections]
     max_list = [_max(measurement_collection) for measurement_collection in measurement_collections]
 
     x_list = [mean.tag for mean in mean_list]
 
-    axs[0].plot(x_list, [20] * len(x_list), TWENTY_DEGREES_CENTIGRADE_COLOR)
+    fig, axs = _init_plot(x_list)
 
-    mean_temperature_list = [mean.temperature for mean in mean_list]
-    mean_humidity_list = [mean.humidity for mean in mean_list]
-    axs[0].plot(x_list, mean_temperature_list, TEMPERATURE_COLOR)
-    axs[1].plot(x_list, mean_humidity_list, HUMIDITY_COLOR)
+    _plot_values(axs, x_list, mean_list, TEMPERATURE_COLOR, HUMIDITY_COLOR)
+    _plot_values(axs, x_list, min_list, LIGHT_TEMPERATURE_COLOR, LIGHT_HUMIDITY_COLOR)
+    _plot_values(axs, x_list, max_list, LIGHT_TEMPERATURE_COLOR, LIGHT_HUMIDITY_COLOR)
 
-    min_temperature_list = [min_item.temperature for min_item in min_list]
-    min_humidity_list = [min_item.humidity for min_item in min_list]
-    axs[0].plot(x_list, min_temperature_list, LIGHT_TEMPERATURE_COLOR)
-    axs[1].plot(x_list, min_humidity_list, LIGHT_HUMIDITY_COLOR)
-
-    max_temperature_list = [max_item.temperature for max_item in max_list]
-    max_humidity_list = [max_item.humidity for max_item in max_list]
-    axs[0].plot(x_list, max_temperature_list, LIGHT_TEMPERATURE_COLOR)
-    axs[1].plot(x_list, max_humidity_list, LIGHT_HUMIDITY_COLOR)
-
-    tags = filter_tags_for_xticks(x_list)
-    indices = [x_list.index(tag) for tag in tags]
-
-    plt.xticks(indices, tags)
+    set_xticks(x_list, filter_tags_for_xticks)
 
     plt.show()
 
@@ -97,6 +107,19 @@ def _evenly_spaced(tags: List[str], max_number_of_elements: int) -> List[str]:
         number_of_tags = len(tags)
         every_nth = round(number_of_tags / max_number_of_elements)
         return [tag for num, tag in enumerate(tags) if num % every_nth == 0]
+
+
+def show_raw_plot(from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
+    measurements = file_service.read_measurements(from_date, to_date)
+    x_list = [str(measurement.datetime()) for measurement in measurements]
+
+    fig, axs = _init_plot(x_list)
+
+    _plot_values(axs, x_list, measurements, TEMPERATURE_COLOR, HUMIDITY_COLOR)
+
+    set_xticks(x_list)
+
+    plt.show()
 
 
 def show_daily_mean_plot(from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
