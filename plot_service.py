@@ -122,6 +122,11 @@ def show_raw_plot(from_date: Optional[date] = None, to_date: Optional[date] = No
     plt.show()
 
 
+def show_hourly_mean_plot(from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
+    measurement_collections = file_service.read_measurements_grouped_by_hour(from_date, to_date)
+    _show_min_max_mean_plot(measurement_collections)
+
+
 def show_daily_mean_plot(from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
     measurement_collections = file_service.read_measurements_grouped_by_day(from_date, to_date)
     _show_min_max_mean_plot(measurement_collections)

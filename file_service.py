@@ -51,6 +51,23 @@ def read_measurements(from_date: Optional[datetime.date] = None,
     return all_measurements
 
 
+def read_measurements_grouped_by_hour(from_date: Optional[datetime.date] = None,
+                                      to_date: Optional[datetime.date] = None) -> List[MeasurementCollection]:
+    collections = []
+    for file_name in get_backup_file_names_without_file_extension():
+        if date_service.file_name_in_interval(file_name, from_date, to_date):
+            measurements_of_day = read_measurements_of_backup_file(file_name)
+            measurements_for_each_hour: List[List[Measurement]] = [[] for i in range(24)]
+            for measurement in measurements_of_day:
+                hour = measurement.time.hour
+                measurements_for_each_hour[hour].append(measurement)
+            measurement_collections_of_day = [MeasurementCollection(f'{file_name} {i}:00', measurements) for
+                                              i, measurements in enumerate(measurements_for_each_hour) if
+                                              len(measurements) > 0]
+            collections.extend(measurement_collections_of_day)
+    return collections
+
+
 def read_measurements_grouped_by_day(from_date: Optional[datetime.date] = None,
                                      to_date: Optional[datetime.date] = None) -> List[MeasurementCollection]:
     collections = []
