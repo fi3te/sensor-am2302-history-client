@@ -1,13 +1,12 @@
-import statistics
 from datetime import date
 from typing import List, Callable, Optional
 
 import matplotlib.pyplot as plt
 from matplotlib import figure, axes
 
+import aggregation_service
 import file_service
-import filter_service
-from model import MeasurementCollection, MeasurementAggregation, AggregationType, MeasurementValue
+from model import MeasurementCollection, MeasurementValue
 
 TWENTY_DEGREES_CENTIGRADE_COLOR = 'lightgrey'
 TEMPERATURE_COLOR = 'tab:red'
@@ -19,33 +18,6 @@ MAX_NUMBER_OF_XTICKS = 5
 
 def _default_filter_tags_for_xticks(tags: List[str]) -> List[str]:
     return _spaced_tags(tags, MAX_NUMBER_OF_XTICKS)
-
-
-def _temperature_list(measurement_collection: MeasurementCollection) -> List[float]:
-    return filter_service.impute_temperature_values_with_mean_of_surroundings(
-        [measurement.temperature for measurement in measurement_collection.measurements])
-
-
-def _humidity_list(measurement_collection: MeasurementCollection) -> List[float]:
-    return [measurement.humidity for measurement in measurement_collection.measurements]
-
-
-def _mean(measurement_collection: MeasurementCollection) -> MeasurementAggregation:
-    return MeasurementAggregation(measurement_collection.tag, AggregationType.MEAN,
-                                  statistics.mean(_temperature_list(measurement_collection)),
-                                  statistics.mean(_humidity_list(measurement_collection)))
-
-
-def _max(measurement_collection: MeasurementCollection) -> MeasurementAggregation:
-    return MeasurementAggregation(measurement_collection.tag, AggregationType.MAX,
-                                  max(_temperature_list(measurement_collection)),
-                                  max(_humidity_list(measurement_collection)))
-
-
-def _min(measurement_collection: MeasurementCollection) -> MeasurementAggregation:
-    return MeasurementAggregation(measurement_collection.tag, AggregationType.MIN,
-                                  min(_temperature_list(measurement_collection)),
-                                  min(_humidity_list(measurement_collection)))
 
 
 def _init_plot(x_list: List[str]) -> (figure.Figure, List[axes.Axes]):
@@ -75,9 +47,9 @@ def set_xticks(x_list: List[str],
 def _show_min_max_mean_plot(measurement_collections: List[MeasurementCollection],
                             filter_tags_for_xticks: Callable[
                                 [List[str]], List[str]] = _default_filter_tags_for_xticks) -> None:
-    mean_list = [_mean(measurement_collection) for measurement_collection in measurement_collections]
-    min_list = [_min(measurement_collection) for measurement_collection in measurement_collections]
-    max_list = [_max(measurement_collection) for measurement_collection in measurement_collections]
+    mean_list = aggregation_service.mean_values(measurement_collections)
+    min_list = aggregation_service.min_values(measurement_collections)
+    max_list = aggregation_service.max_values(measurement_collections)
 
     x_list = [mean.tag for mean in mean_list]
 
