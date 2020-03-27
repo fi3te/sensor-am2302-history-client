@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List, Optional, Pattern
 
 import backup_service
-import plot_service
+import matplotlib_service
 import print_service
 import statistics_service
 
@@ -55,11 +55,11 @@ all_options = [
     ActionOption('1', 'Backup files', backup_service.start_backup),
     ActionOption('2', 'Show backup statistics', statistics_service.show_statistics, INTERVAL_ARGUMENT_DEFINITION),
     ChoiceOption('3', 'Create plot', [
-        ActionOption('1', 'Raw plot', plot_service.show_raw_plot, INTERVAL_ARGUMENT_DEFINITION),
-        ActionOption('2', 'Hourly mean plot', plot_service.show_hourly_mean_plot, INTERVAL_ARGUMENT_DEFINITION),
-        ActionOption('3', 'Daily mean plot', plot_service.show_daily_mean_plot, INTERVAL_ARGUMENT_DEFINITION),
-        ActionOption('4', 'Weekly mean plot', plot_service.show_weekly_mean_plot, INTERVAL_ARGUMENT_DEFINITION),
-        ActionOption('5', 'Monthly mean plot', plot_service.show_monthly_mean_plot, INTERVAL_ARGUMENT_DEFINITION)
+        ActionOption('1', 'Raw plot', matplotlib_service.show_raw_plot, INTERVAL_ARGUMENT_DEFINITION),
+        ActionOption('2', 'Hourly mean plot', matplotlib_service.show_hourly_mean_plot, INTERVAL_ARGUMENT_DEFINITION),
+        ActionOption('3', 'Daily mean plot', matplotlib_service.show_daily_mean_plot, INTERVAL_ARGUMENT_DEFINITION),
+        ActionOption('4', 'Weekly mean plot', matplotlib_service.show_weekly_mean_plot, INTERVAL_ARGUMENT_DEFINITION),
+        ActionOption('5', 'Monthly mean plot', matplotlib_service.show_monthly_mean_plot, INTERVAL_ARGUMENT_DEFINITION)
     ])
 ]
 
