@@ -4,13 +4,11 @@ from xml.etree import ElementTree
 
 import requests
 from lxml import etree
-
-ip: str = '192.168.0.50'
-port: int = 4000
+import constants
 
 
 def _generate_url(x: str) -> str:
-    return 'http://{ip}:{port}/{x}'.format(ip=ip, port=port, x=x)
+    return f'http://{constants.IP}:{constants.PORT}/{x}'
 
 
 def download_file(date: str) -> str:

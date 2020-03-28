@@ -1,7 +1,7 @@
 import statistics
 from typing import List
 
-import filter_service
+from util import filter_service
 from model import MeasurementCollection, MeasurementAggregation, AggregationType
 
 

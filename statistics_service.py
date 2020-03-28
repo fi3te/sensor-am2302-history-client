@@ -3,7 +3,7 @@ from datetime import date
 from typing import List, Optional
 
 import file_service
-import filter_service
+from util import filter_service
 import print_service
 
 

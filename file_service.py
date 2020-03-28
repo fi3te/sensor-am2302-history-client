@@ -2,7 +2,7 @@ import datetime
 import os
 from typing import List, Optional
 
-import date_service
+from util import date_service
 from model import Measurement, MeasurementCollection
 
 BACKUP_FOLDER_NAME = 'backup'
