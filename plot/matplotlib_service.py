@@ -7,12 +7,9 @@ from matplotlib import figure, axes
 import aggregation_service
 import file_service
 from model import MeasurementCollection, MeasurementValue
+from plot import constants
+from plot.model import PlotService
 
-TWENTY_DEGREES_CENTIGRADE_COLOR = 'lightgrey'
-TEMPERATURE_COLOR = 'tab:red'
-LIGHT_TEMPERATURE_COLOR = 'mistyrose'
-HUMIDITY_COLOR = 'tab:blue'
-LIGHT_HUMIDITY_COLOR = 'lavender'
 MAX_NUMBER_OF_XTICKS = 5
 
 
@@ -22,10 +19,10 @@ def _default_filter_tags_for_xticks(tags: List[str]) -> List[str]:
 
 def _init_plot(x_list: List[str]) -> (figure.Figure, List[axes.Axes]):
     fig, axs = plt.subplots(2, sharex='all')
-    fig.suptitle('Temperature and humidity values')
-    axs[0].set_title('Temperature (°C)')
-    axs[1].set_title('Humidity (%)')
-    axs[0].plot(x_list, [20] * len(x_list), TWENTY_DEGREES_CENTIGRADE_COLOR)
+    fig.suptitle(constants.TITLE)
+    axs[0].set_title(constants.TEMPERATURE_HEADING)
+    axs[1].set_title(constants.HUMIDITY_HEADING)
+    axs[0].plot(x_list, [20] * len(x_list), constants.TWENTY_DEGREES_CENTIGRADE_COLOR)
     return fig, axs
 
 
@@ -55,9 +52,9 @@ def _show_min_max_mean_plot(measurement_collections: List[MeasurementCollection]
 
     fig, axs = _init_plot(x_list)
 
-    _plot_values(axs, x_list, mean_list, TEMPERATURE_COLOR, HUMIDITY_COLOR)
-    _plot_values(axs, x_list, min_list, LIGHT_TEMPERATURE_COLOR, LIGHT_HUMIDITY_COLOR)
-    _plot_values(axs, x_list, max_list, LIGHT_TEMPERATURE_COLOR, LIGHT_HUMIDITY_COLOR)
+    _plot_values(axs, x_list, mean_list, constants.TEMPERATURE_COLOR, constants.HUMIDITY_COLOR)
+    _plot_values(axs, x_list, min_list, constants.LIGHT_TEMPERATURE_COLOR, constants.LIGHT_HUMIDITY_COLOR)
+    _plot_values(axs, x_list, max_list, constants.LIGHT_TEMPERATURE_COLOR, constants.LIGHT_HUMIDITY_COLOR)
 
     set_xticks(x_list, filter_tags_for_xticks)
 
@@ -81,34 +78,32 @@ def _evenly_spaced(tags: List[str], max_number_of_elements: int) -> List[str]:
         return [tag for num, tag in enumerate(tags) if num % every_nth == 0]
 
 
-def show_raw_plot(from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
-    measurements = file_service.read_measurements(from_date, to_date)
-    x_list = [str(measurement.datetime()) for measurement in measurements]
+class MatplotlibService(PlotService):
 
-    fig, axs = _init_plot(x_list)
+    def show_raw_plot(self, from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
+        measurements = file_service.read_measurements(from_date, to_date)
+        x_list = [str(measurement.datetime()) for measurement in measurements]
 
-    _plot_values(axs, x_list, measurements, TEMPERATURE_COLOR, HUMIDITY_COLOR)
+        fig, axs = _init_plot(x_list)
 
-    set_xticks(x_list)
+        _plot_values(axs, x_list, measurements, constants.TEMPERATURE_COLOR, constants.HUMIDITY_COLOR)
 
-    plt.show()
+        set_xticks(x_list)
 
+        plt.show()
 
-def show_hourly_mean_plot(from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
-    measurement_collections = file_service.read_measurements_grouped_by_hour(from_date, to_date)
-    _show_min_max_mean_plot(measurement_collections)
+    def show_hourly_mean_plot(self, from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
+        measurement_collections = file_service.read_measurements_grouped_by_hour(from_date, to_date)
+        _show_min_max_mean_plot(measurement_collections)
 
+    def show_daily_mean_plot(self, from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
+        measurement_collections = file_service.read_measurements_grouped_by_day(from_date, to_date)
+        _show_min_max_mean_plot(measurement_collections)
 
-def show_daily_mean_plot(from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
-    measurement_collections = file_service.read_measurements_grouped_by_day(from_date, to_date)
-    _show_min_max_mean_plot(measurement_collections)
+    def show_weekly_mean_plot(self, from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
+        measurement_collection = file_service.read_measurements_grouped_by_week(from_date, to_date)
+        _show_min_max_mean_plot(measurement_collection)
 
-
-def show_weekly_mean_plot(from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
-    measurement_collection = file_service.read_measurements_grouped_by_week(from_date, to_date)
-    _show_min_max_mean_plot(measurement_collection)
-
-
-def show_monthly_mean_plot(from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
-    measurement_collections = file_service.read_measurements_grouped_by_month(from_date, to_date)
-    _show_min_max_mean_plot(measurement_collections, lambda tags: _evenly_spaced(tags, MAX_NUMBER_OF_XTICKS))
+    def show_monthly_mean_plot(self, from_date: Optional[date] = None, to_date: Optional[date] = None) -> None:
+        measurement_collections = file_service.read_measurements_grouped_by_month(from_date, to_date)
+        _show_min_max_mean_plot(measurement_collections, lambda tags: _evenly_spaced(tags, MAX_NUMBER_OF_XTICKS))
