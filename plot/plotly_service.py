@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 from plotly.graph_objs.scatter import Line
 from plotly.subplots import make_subplots
 
-import aggregation_service
+from util import aggregation_service
 import file_service
 from model import MeasurementValue, MeasurementCollection
 from plot import constants
