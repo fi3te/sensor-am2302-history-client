@@ -4,7 +4,7 @@ from typing import List, Callable, Optional
 import matplotlib.pyplot as plt
 from matplotlib import figure, axes
 
-import aggregation_service
+from util import aggregation_service
 import file_service
 from model import MeasurementCollection, MeasurementValue
 from plot import constants
