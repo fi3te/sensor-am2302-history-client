@@ -10,6 +10,7 @@ requests = "*"
 lxml = "*"
 matplotlib = "*"
 plotly = "==4.5.4"
+argh = "*"
 
 [requires]
 python_version = "3.9"
