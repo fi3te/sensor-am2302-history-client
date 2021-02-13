@@ -1,10 +1,14 @@
 import re
 import types
 from abc import ABC
+from argparse import ArgumentParser
 from datetime import datetime
 from typing import List, Optional, Pattern
 
+import argh
+
 import backup_service
+import constants
 import print_service
 import statistics_service
 from plot.plotly_service import PlotlyService
@@ -66,7 +70,7 @@ all_options = [
 ]
 
 
-def request_argument(argument: ArgumentDefinition):
+def _request_argument(argument: ArgumentDefinition):
     print_service.print_subheading(
         f'{argument.description} ({argument.pattern_hint}, default value: {argument.default_value})')
     while True:
@@ -77,7 +81,7 @@ def request_argument(argument: ArgumentDefinition):
             return argument.cast(user_input)
 
 
-def process_options(options: List[Option]) -> None:
+def _process_options(options: List[Option]) -> None:
     print()
     for option in options:
         print(f'{option.key}) {option.description}')
@@ -86,23 +90,37 @@ def process_options(options: List[Option]) -> None:
     dictionary = {option.key: option for option in options}
     chosen_option = dictionary.get(user_input)
     if isinstance(chosen_option, ChoiceOption):
-        process_options(chosen_option.suboptions)
+        _process_options(chosen_option.suboptions)
     elif isinstance(chosen_option, ActionOption):
         if chosen_option.arguments:
             arguments = []
             for argument in chosen_option.arguments:
-                arguments.append(request_argument(argument))
+                arguments.append(_request_argument(argument))
             chosen_option.action(*arguments)
         else:
             chosen_option.action()
     else:
-        process_options(options)
+        _process_options(options)
+
+
+@constants.add_parameters
+def default() -> None:
+    print_service.print_subheading('Please choose an option...')
+    _process_options(all_options)
+
+
+@argh.named('backup')
+@constants.add_parameters
+def backup() -> None:
+    backup_service.start_backup()
 
 
 def main() -> None:
     print_service.print_heading('sensor-am2302-history-client')
-    print_service.print_subheading('Please choose an option...')
-    process_options(all_options)
+    parser = ArgumentParser()
+    argh.add_commands(parser, [backup])
+    argh.set_default_command(parser, default)
+    argh.dispatch(parser)
 
 
 if __name__ == '__main__':

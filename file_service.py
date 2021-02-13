@@ -2,14 +2,12 @@ import datetime
 import os
 from typing import List, Optional
 
+import constants
 from util import date_service
 from model import Measurement, MeasurementCollection
 
-BACKUP_FOLDER_NAME = 'backup'
-BACKUP_FOLDER_PATH = './' + BACKUP_FOLDER_NAME
 
-
-def _file(file_name: str, mode: str): return open(BACKUP_FOLDER_PATH + '/' + file_name + '.txt', mode, encoding='utf-8')
+def _file(file_name: str, mode: str): return open(f'{constants.BACKUP_FOLDER_PATH}/{file_name}.txt', mode, encoding='utf-8')
 
 
 def _parse_measurement(measurement: str, date: datetime.date) -> Measurement:
@@ -21,11 +19,11 @@ def _parse_measurement(measurement: str, date: datetime.date) -> Measurement:
 
 
 def create_directory_for_backup_files() -> str:
-    if not os.path.exists(BACKUP_FOLDER_NAME):
-        os.mkdir(BACKUP_FOLDER_NAME)
-        return 'Directory "%s" created.' % BACKUP_FOLDER_NAME
+    if not os.path.exists(constants.BACKUP_FOLDER_PATH):
+        os.makedirs(constants.BACKUP_FOLDER_PATH)
+        return f'Directory "{constants.BACKUP_FOLDER_PATH}" created.'
     else:
-        return 'Directory "%s" already exists.' % BACKUP_FOLDER_NAME
+        return f'Directory "{constants.BACKUP_FOLDER_PATH}" already exists.'
 
 
 def write_content_to_backup_file(file_name: str, file_content: str) -> None:
@@ -108,9 +106,9 @@ def read_measurements_grouped_by_week(from_date: Optional[datetime.date] = None,
 
 def get_backup_file_names_without_file_extension() -> List[str]:
     backup_file_names = []
-    for subdir, dirs, files in os.walk(BACKUP_FOLDER_PATH):
+    for subdir, dirs, files in os.walk(constants.BACKUP_FOLDER_PATH):
         for file in files:
-            if subdir == BACKUP_FOLDER_PATH:
+            if subdir == constants.BACKUP_FOLDER_PATH:
                 backup_file_names.append(file[:-4])
     backup_file_names.sort()
     return backup_file_names
@@ -118,9 +116,9 @@ def get_backup_file_names_without_file_extension() -> List[str]:
 
 def count_backup_files(from_date: Optional[datetime.date] = None, to_date: Optional[datetime.date] = None) -> int:
     count = 0
-    for subdir, dirs, files in os.walk(BACKUP_FOLDER_PATH):
+    for subdir, dirs, files in os.walk(constants.BACKUP_FOLDER_PATH):
         for file in files:
-            if subdir == BACKUP_FOLDER_PATH:
+            if subdir == constants.BACKUP_FOLDER_PATH:
                 file_name = file[:-4]
                 if date_service.file_name_in_interval(file_name, from_date, to_date):
                     count += 1
