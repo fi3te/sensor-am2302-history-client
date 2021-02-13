@@ -13,15 +13,18 @@ def start_backup() -> None:
     print_service.print_subheading('Determining already downloaded files...')
     downloaded_elements = file_service.get_backup_file_names_without_file_extension()
     print('Count: ' + str(len(downloaded_elements)))
-    last_downloaded_element = downloaded_elements[-1]
-    print('Last downloaded: ' + last_downloaded_element)
 
     print_service.print_subheading('Determining available files...')
     all_elements = http_client.fetch_dates_with_sensor_data()
     print('Count: ' + str(len(all_elements)))
     files_to_download = [element for element in all_elements if element not in downloaded_elements]
-    if last_downloaded_element in all_elements:
-        files_to_download.append(last_downloaded_element)
+
+    if len(downloaded_elements) > 0:
+        last_downloaded_element = downloaded_elements[-1]
+        print('Last downloaded: ' + last_downloaded_element)
+        if last_downloaded_element in all_elements:
+            files_to_download.append(last_downloaded_element)
+
     number_of_files_to_download = len(files_to_download)
     print('Files to download: ' + str(number_of_files_to_download))
 
