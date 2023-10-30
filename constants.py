@@ -10,7 +10,7 @@ BACKUP_FOLDER_PATH = './backup'
 def add_parameters(func):
     global IP, PORT, BACKUP_FOLDER_PATH
 
-    def wrapper(ip: str = IP,
+    def wrapper(*, ip: str = IP,
                 port: str = PORT,
                 backup_folder_path: str = BACKUP_FOLDER_PATH) -> Optional:
         global IP, PORT, BACKUP_FOLDER_PATH

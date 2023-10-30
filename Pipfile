@@ -6,11 +6,11 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-requests = "*"
-lxml = "*"
-matplotlib = "*"
-plotly = "==4.5.4"
-argh = "*"
+requests = "2.31.0"
+lxml = "4.9.3"
+matplotlib = "3.8.0"
+plotly = "5.18.0"
+argh = "0.30.2"
 
 [requires]
 python_version = "3.9"
