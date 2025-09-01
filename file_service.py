@@ -35,7 +35,11 @@ def write_content_to_backup_file(file_name: str, file_content: str) -> None:
 def read_measurements_of_backup_file(file_name: str) -> List[Measurement]:
     file = _file(file_name, 'r')
     date = date_service.file_name_to_date(file_name)
-    measurements = [_parse_measurement(line[:-1], date) for line in file]
+    try:
+        measurements = [_parse_measurement(line[:-1], date) for line in file]
+    except ValueError:
+        print('Cannot parse file ' + file_name)
+        raise
     file.close()
     return measurements
 
