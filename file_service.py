@@ -112,7 +112,7 @@ def get_backup_file_names_without_file_extension() -> List[str]:
     backup_file_names = []
     for subdir, dirs, files in os.walk(constants.BACKUP_FOLDER_PATH):
         for file in files:
-            if subdir == constants.BACKUP_FOLDER_PATH:
+            if subdir == constants.BACKUP_FOLDER_PATH and not file.startswith('.'):
                 backup_file_names.append(file[:-4])
     backup_file_names.sort()
     return backup_file_names
@@ -122,7 +122,7 @@ def count_backup_files(from_date: Optional[datetime.date] = None, to_date: Optio
     count = 0
     for subdir, dirs, files in os.walk(constants.BACKUP_FOLDER_PATH):
         for file in files:
-            if subdir == constants.BACKUP_FOLDER_PATH:
+            if subdir == constants.BACKUP_FOLDER_PATH and not file.startswith('.'):
                 file_name = file[:-4]
                 if date_service.file_name_in_interval(file_name, from_date, to_date):
                     count += 1
